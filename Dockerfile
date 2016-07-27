@@ -10,6 +10,8 @@ RUN sed -ri 's/#PermitRootLogin yes/PermitRootLogin yes/g' /etc/ssh/sshd_config
 # http://stackoverflow.com/questions/18173889/cannot-access-centos-sshd-on-docker
 RUN sed -ri 's/UsePAM yes/#UsePAM yes/g' /etc/ssh/sshd_config
 RUN sed -ri 's/#UsePAM no/UsePAM no/g' /etc/ssh/sshd_config
+
+#Change the password 'cms-docker' to something unique
 RUN echo 'root:cms-docker' |chpasswd
 
 ADD cvmfs/default.local /etc/cvmfs/default.local
