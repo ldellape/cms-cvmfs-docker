@@ -44,6 +44,20 @@ Once inside the container, you can setup the CMSSW area in the standard way
 > scram project CMSSW_8_0_0
 
 --------------------------------------------
+Setting up XRootD and VOMS software
+
+> source /cvmfs/oasis.opensciencegrid.org/mis/osg-wn-client/current/el6-x86_64/setup.sh
+- you will need to set up your own grid certificate
+> mkdir .globus
+> cd .globus/
+> openssl pkcs12 -in mycert.p12 -clcerts -nokeys -out usercert.pem
+> openssl pkcs12 -in mycert.p12 -nocerts -out userkey.pem
+> chmod 400 userkey.pem
+> chmod 400 usercert.pem
+> cd ..
+> chmod 700 .globus/
+
+--------------------------------------------
 Stopping a container
 
 After logging out of the ssh session in the docker container, you can temporarily stop the container daemon by doing
