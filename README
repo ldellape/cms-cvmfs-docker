@@ -56,6 +56,8 @@ Setting up XRootD and VOMS software
 > chmod 400 usercert.pem
 > cd ..
 > chmod 700 .globus/
+- for some reason you need to specify the usercert.pem and userkey.pem files manually
+> voms-proxy-init -voms cms --valid 192:00 -cert .globus/usercert.pem -key .globus/userkey.pem
 
 --------------------------------------------
 Stopping a container
