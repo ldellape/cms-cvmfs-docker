@@ -16,6 +16,10 @@ RUN echo 'root:cms-docker' |chpasswd
 
 ADD cvmfs/default.local /etc/cvmfs/default.local
 ADD cvmfs/run.sh /root/run.sh
+ADD cvmfs/append_to_bashrc.sh /root/.append_to_bashrc.sh
+RUN cat /root/.append_to_bashrc.sh >> /root/.bashrc
+RUN mkdir .globus
+RUN chmod 0700 .globus
 RUN mkdir /cvmfs/cms.cern.ch ; #mkdir /cvmfs/cms-condb.cern.ch
 RUN echo "cms.cern.ch /cvmfs/cms.cern.ch cvmfs defaults 0 0" >> /etc/fstab
 RUN mkdir /cvmfs/cms-ib.cern.ch ;
