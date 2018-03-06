@@ -18,7 +18,7 @@ RUN echo X11Forwarding yes >> /etc/ssh/ssh_config
 # Install fonts for X11
 RUN wget https://www.itzgeek.com/msttcore-fonts-2.0-3.noarch.rpm
 RUN rpm -Uvh msttcore-fonts-2.0-3.noarch.rpm
-RUN rm https://www.itzgeek.com/msttcore-fonts-2.0-3.noarch.rpm
+RUN rm msttcore-fonts-2.0-3.noarch.rpm
 
 #Change the password 'cms-docker' to something unique
 RUN echo 'root:cms-docker' |chpasswd
