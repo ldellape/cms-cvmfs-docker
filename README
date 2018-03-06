@@ -1,5 +1,9 @@
 This project is used to create a Docker container which can access the CMS LHC experiment's CVMFS file system.
 
+Branch|Build|Type|Pulls|Stars|Docker Hub
+---|---|---|---|---|---
+latest | [![Docker Build Status](https://img.shields.io/docker/build/aperloff/cms-cvmfs-docker.svg)](https://img.shields.io/docker/build/aperloff/cms-cvmfs-docker.svg) | [![Docker Build Type](https://img.shields.io/docker/automated/aperloff/cms-cvmfs-docker.svg)](https://img.shields.io/docker/automated/aperloff/cms-cvmfs-docker.svg) | [![](https://img.shields.io/docker/pulls/aperloff/cms-cvmfs-docker.svg)](https://img.shields.io/docker/pulls/aperloff/cms-cvmfs-docker.svg) | [![](https://img.shields.io/docker/stars/aperloff/cms-cvmfs-docker.svg)](https://img.shields.io/docker/stars/aperloff/cms-cvmfs-docker.svg) | [cms-cvmfs-docker](https://hub.docker.com/r/aperloff/cms-cvmfs-docker/)
+
 --------------------------------------------
 Setting up the container
 
@@ -9,6 +13,11 @@ Change the password used to login via ssh to the container
 
 In the directory containing the Dockerfile file, run this commands
 > docker build -t cms-cvmfs-docker .
+
+If you would rather not build the container yourself, you can always check it out from Docker Hub.
+> docker pull aperloff/cms-cvmfs-docker:[tag]
+
+The number of tags varies from time to time based on the current number of branches in GitHub. There will always be a `latest` tag, which is built from the master branch.
 
 --------------------------------------------
 Starting the container for the first time
