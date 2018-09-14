@@ -32,6 +32,8 @@ RUN mkdir /cvmfs/sft.cern.ch ;
 RUN echo "sft.cern.ch /cvmfs/sft.cern.ch cvmfs defaults 0 0" >> /etc/fstab
 RUN mkdir /cvmfs/cms-bril.cern.ch ;
 RUN echo "cms-bril.cern.ch /cvmfs/cms-bril.cern.ch cvmfs defaults 0 0" >> /etc/fstab
+RUN mkdir /cvmfs/cms-opendata-conddb.cern.ch ;
+RUN echo "cms-opendata-conddb.cern.ch /cvmfs/cms-opendata-conddb.cern.ch cvmfs defaults 0 0" >> /etc/fstab
 
 EXPOSE 22
 CMD /root/run.sh
