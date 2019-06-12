@@ -3,7 +3,7 @@ MAINTAINER Alexx Perloff "Alexx.Perloff@Colorado.edu"
 
 RUN yum update -y
 ADD cvmfs/cernvm.repo /etc/yum.repos.d/cernvm.repo
-RUN yum install emacs openssh-server nano cvmfs man freetype openssl098e libXpm libXext wget git  tcsh zsh tcl  perl-ExtUtils-Embed perl-libwww-perl  compat-libstdc++-33  libXmu  libXpm  zip e2fsprogs krb5-devel krb5-workstation  strace libXft xdm ImageMagick ImageMagick-devel -y
+RUN yum install emacs openssh-server nano cvmfs man freetype openssl098e libXpm libXext wget git  tcsh zsh tcl  perl-ExtUtils-Embed perl-libwww-perl  compat-libstdc++-33  libXmu  libXpm  zip e2fsprogs krb5-devel krb5-workstation  strace libXft xdm ImageMagick ImageMagick-devel mesa-libGL mesa-libGLU glx-utils -y
 RUN ssh-keygen -t rsa -f /etc/ssh/ssh_host_rsa_key
 # Bad security, add a user and sudo instead!
 RUN sed -ri 's/#PermitRootLogin yes/PermitRootLogin yes/g' /etc/ssh/sshd_config
