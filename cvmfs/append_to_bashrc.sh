@@ -7,7 +7,7 @@ echo "Checking CVMFS mounts ..."
 if cvmfs_config probe >/dev/null; then
     echo -e "\tAll CVMFS folders mounted"
 else
-    echo -e "\tAt least one CVMFS foldersis not mounted. Will automatially execute run.sh"
+    echo -e "\tAt least one CVMFS folders is not mounted. Will automatially execute run.sh"
     ./run.sh
 fi
 

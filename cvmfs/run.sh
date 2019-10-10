@@ -7,10 +7,10 @@ mount -a
 chsh -s /bin/bash root
 
 # restarts the xdm service
-/etc/init.d/xdm restart
+#/etc/init.d/xdm restart
 
 # Create the directory needed to run the sshd daemon
-mkdir /var/run/sshd
+#mkdir /var/run/sshd
 
 # Start the ssh service
-/usr/sbin/sshd -D
+#/usr/sbin/sshd -D
