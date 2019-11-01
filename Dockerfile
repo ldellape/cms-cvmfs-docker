@@ -5,6 +5,7 @@ ADD cvmfs/cernvm.repo /etc/yum.repos.d/cernvm.repo
 ADD cvmfs/default.local /etc/cvmfs/default.local
 ADD cvmfs/run.sh /root/run.sh
 ADD cvmfs/append_to_bashrc.sh /root/.append_to_bashrc.sh
+ADD cvmfs/krb5.conf /etc/krb5.conf
 
 RUN yum update -y \
     && yum install -y https://ecsft.cern.ch/dist/cvmfs/cvmfs-release/cvmfs-release-latest.noarch.rpm \

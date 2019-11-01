@@ -1,6 +1,7 @@
 
 # add some aliases that don't exist by default in this container
 alias lla='ll -ah'
+alias voms-proxy-init='voms-proxy-init -voms cms --valid 192:00 -cert ~/.globus/usercert.pem -key ~/.globus/userkey.pem'
 
 # Check to see if the cvmfs folders are mounted
 echo -ne "Checking CVMFS mounts ... "
