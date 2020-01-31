@@ -1,5 +1,7 @@
 #!/bin/bash
 
+chmod o+rw /dev/fuse
+
 if [ -z "$MY_UID" ]; then
 	MY_UID=$(id -u cmsuser)
 	echo "MY_UID variable not specified, defaulting to cmsuser user id ($MY_UID)"
