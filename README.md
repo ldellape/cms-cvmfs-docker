@@ -1,125 +1,139 @@
-This project is used to create a Docker container which can access the CMS LHC experiment's CVMFS file system.
+# cms-cvmfs-docker: A docker container for the CMS user
+
+This project was setup to allow local access to the CernVM File System (CernVM-FS or CVMFS). Users may want access to CVMFS for a multitude of reasons, not the least of which are offline access to CMSSW, local access to grid tools, or a sandboxed environment. Whatever the reason is, this container was built with a couple of requirements in mind:
+
+1. Local access to CVMFS
+2. A Linux environment in which to work with the CMSSW and OSG tools
+3. X11 support for using GUIs and ImageMagic
+4. Don't trip the Fermilab network security policies
+   - Don't ssh into the container using a password
+   - Don't open unnecessary ports
+   - Don't allow the use of passwords to login
+   - Simply put, don't use Ubuntu or Centos unless you want to configure a lot of the software yourself
+5. UID and GID mapping for using the grid certificate on the localhost
+6. Use of a lightweight container system like docker rather than a full virtual machine
+7. The use of DockerHub as a build system
 
 Branch|Build|Type|Pulls|Stars|Docker Hub
 ---|---|---|---|---|---
 latest | [![Docker Build Status](https://img.shields.io/docker/build/aperloff/cms-cvmfs-docker.svg)](https://img.shields.io/docker/build/aperloff/cms-cvmfs-docker.svg) | [![Docker Build Type](https://img.shields.io/docker/automated/aperloff/cms-cvmfs-docker.svg)](https://img.shields.io/docker/automated/aperloff/cms-cvmfs-docker.svg) | [![](https://img.shields.io/docker/pulls/aperloff/cms-cvmfs-docker.svg)](https://img.shields.io/docker/pulls/aperloff/cms-cvmfs-docker.svg) | [![](https://img.shields.io/docker/stars/aperloff/cms-cvmfs-docker.svg)](https://img.shields.io/docker/stars/aperloff/cms-cvmfs-docker.svg) | [cms-cvmfs-docker](https://hub.docker.com/r/aperloff/cms-cvmfs-docker/)
 
 --------------------------------------------
-Setting up the container
+## Setting up the Docker image
 
-Change the password used to login via ssh to the container
-- open the Dockerfile file and find the line containing 'chpasswd'
-- change the default password to something unique
+There are two ways to access this container, build it yourself or pull the image from DockerHub. Below we will describe both methods.
+
+### Building the image
 
 In the directory containing the Dockerfile file, run this command
 > docker build -t <name>[:<tag>] .
 For example:
-> docker build -t cms-cvmfs-docker:X11-forwarding-sl6 .
+> docker build -t cms-cvmfs-docker:latest .
+The name and tag choice are up to you.
 
-If you would rather not build the container yourself, you can always check it out from Docker Hub.
+### Pulling a pre-build image
+
+If you would rather not build the image yourself, you can always check it out (pull) from DockerHub.
 > docker pull aperloff/cms-cvmfs-docker[:tag]
 
 The number of tags varies from time to time based on the current number of branches in GitHub. There will always be a `latest` tag, which is built from the master branch.
 
 --------------------------------------------
-Starting the container for the first time
+## Container basics
 
-To run the container as a background daemon
-> docker run -d -ti -P --privileged -e DISPLAY=$DISPLAY --name cms-cvmfs -v /Users/aperloff/Downloads/tmp/cmsShow-docker:/root/cmsShow-docker/ aperloff/cms-cvmfs-docker
-> docker run -d -ti -P --privileged -e DISPLAY=host.docker.internal:0 --name cms-cvmfs -v /Users/aperloff/Downloads/tmp/cmsShow-docker:/root/cmsShow-docker/ -v /tmp/.X11-unix:/tmp/.X11-unix aperloff/cms-cvmfs-docker:X11-forwarding
-> docker run --rm -it -P --privileged -e DISPLAY=host.docker.internal:0 -e CVMFS_MOUNTS="cms.cern.ch oasis.opensciencegrid.org" --name cms-cvmfs-test -v /Users/aperloff/Downloads/tmp/cmsShow-docker:/root/cmsShow-docker/ cms-cvmfs-docker:X11-forwarding-sl6
+### Starting the container (for the first time)
 
+To run the container use a command similar to:
+> docker run -it -P --device /dev/fuse --cap-add SYS_ADMIN -e DISPLAY=host.docker.internal:0 <name>[:<tag>]
+where the name and tag will be dependent on if your accessing a local image or the pre-built from DockerHub. For information about the name and tag choices, see the previous section on setting up the image.
 
-To determine which port to use when doing ssh into the container
-> docker port cms-cvmfs 22
+You may also customize the run command with some additional options. These options and their effect are described below:
+- If you would like the container to be removed immediately upon exiting the container, simply add ```--rm``` to the command.
+- If you would like to limit the number of CVMFS mount points, you can add ```-e CVMFS_MOUNTS="<mounts>"```, where ```<mounts>``` is a space separated list of mount points. The accessible mount points are:
+   - cms.cern.ch
+   - cms-ib.cern.ch
+   - oasis.opensciencegrid.org
+   - cms-lpc.opensciencegrid.org
+   - sft.cern.ch
+   - cms-bril.cern.ch
+   - cms-opendata-conddb.cern.ch
+- To access a grid certificate on the host computer you will need to not only mount the directory containing the certificate files, but also map the host user's UID and GID to that of the remote user. To do this you will need to append the commands: ```-e MY_UID=$(id -u) -e MY_GID=$(id -g) -v ~/.globus:/home/cmsuser/.globus```. Though technically the local ```.globus``` folder doesn't need to be in the local users home area.
+- To mount other local folders, simply add ```-v <path to local folder>:<path to remote folder>```.
+- To name the container, add the ```--name <name>``` option. If you don't name the container, Docker will assign a random string name to the container. You can find the name of the container by entering the command ```docker ps -a``` on the host computer.
 
-the output should be something like
-0.0.0.0:32768
+A full command may look something like:
+> docker run --rm -it -P --device /dev/fuse --cap-add SYS_ADMIN -e CVMFS_MOUNTS="cms.cern.ch oasis.opensciencegrid.org" -e DISPLAY=host.docker.internal:0 -e MY_UID=$(id -u) -e MY_GID=$(id -g) -v ~/.globus:/home/cmsuser/.globus aperloff/cms-cvmfs-docker:latest
 
-Then to ssh into the container, use the obtained from the previous command, e.g.
-> ssh root@0.0.0.0 -p 32768
+### Stopping a container
 
-Use the password you set in the Dockerfile
+If you've added the ```--rm``` option to the run command, then the container will be removed once you enter the ```exit``` command from within the container and the pseudo-tty is closed.
 
-If for some reason you recieve the message:
-```bash
-ssh_exchange_identification: Connection closed by remote host
-```
-then run the following command to start the sshd daemon.
-```bash
-docker exec cms-cvmfs service sshd start
-``` 
-In this command ```cms-cvmfs``` is the name of the docker container.
+However, if you haven't added that option, then you will need to explicitly shutdown the container. Exit as described above and then use the following command to temporarily stop the container daemon:
+> docker stop <container name>
 
-If you need to edit a file inside of the container, say you accidentally changed a setting that locked you out, then use a command like:
-```bash
-docker exec -ti cms-cvmfs sh -c "sed -i 's/PasswordAuthentication no/PasswordAuthentication yes/' /etc/ssh/sshd_config"
-```
+### Restarting a container
 
-Run the following command the very first time you run the container in order to mount the cvmfs file system
-> ./run.sh
+You can restart a container after it had been stopped by doing
+> docker start <container name>
 
-If you want to have a command line, but don't need X11 forwarding, you can get access to a shell inside the container by using:
-```bash
-docker exec -it cms-cvmfs bash -i
-```
+You may need to remount the CVMFS folders by runnign the command:
+> /run.sh
+
+### Removing a container
+
+If you decide you no longer need that particular container (perhaps you want to start another fresh one), you can delete that container instance by doing
+> docker rm <container name>
+
+### Opening another instance into the same container
+
+If you find you need multiple instances withing the same container you can use the following command to open a new shell in the container:
+> docker exec -it <container name> bash -i
+
 The starting path will be '/'. Without the ```-i``` command the shell will start without loading any of the interactive login scripts.
 
 --------------------------------------------
-Setting up an CMSSW area
+## What can I do with this?
+
+Now that you've started the container, you have full access to the suite of grid and CMS software.
+
+### Setting up XRootD and VOMS software
+
+Prerequisites:
+- You've mounted oasis.opensciencegrid.org
+- You've mounted you local .globus folder to /home/cmsuser/.globus
+- The permissions on the .globus folder, the usercert.pem file, and userkey.pem file are correct
+
+If you've satisfied the prerequisites, then you simply need to run the command:
+> voms-proxy-init -voms cms --valid 192:00 -cert .globus/usercert.pem -key .globus/userkey.pem
+For some reason you need to specify the usercert.pem and userkey.pem files manually. However, this long command has been aliased inside the ```.bashrc``` file and you simply need to type:
+> voms-proxy-init
+
+### Setting up a CMSSW area
+
+Prerequisites:
+- You've mounted cms.cern.ch
 
 Once inside the container, you can setup the CMSSW area in the standard way
 
-- do the initial setup to get the 'scram' command
-> source /cvmfs/cms.cern.ch/cmsset_default.sh
-- move to a directory you want to make a CMSSW work area
-- see what CMSSW versions are available
+- move to the directory where you would like to checkout CMSSW
+- see what CMSSW versions are available by doing
 > scram list -a CMSSW 
 - setup a work area for a specific version, e.g.
-> scram project CMSSW_8_0_0
+> scram project CMSSW_10_6_0
+
+Note: The initial setup of the paths to the CMS software is handled within the ```.bashrc``` file. This gets you the 'cmsrel' and 'scram' commands, among others.
 
 --------------------------------------------
-Setting up XRootD and VOMS software
-
-> source /cvmfs/oasis.opensciencegrid.org/mis/osg-wn-client/current/el6-x86_64/setup.sh
-- you will need to set up your own grid certificate
-> mkdir .globus
-> cd .globus/
-> openssl pkcs12 -in mycert.p12 -clcerts -nokeys -out usercert.pem
-> openssl pkcs12 -in mycert.p12 -nocerts -out userkey.pem
-> chmod 400 userkey.pem
-> chmod 400 usercert.pem
-> cd ..
-> chmod 700 .globus/
-- for some reason you need to specify the usercert.pem and userkey.pem files manually
-> voms-proxy-init -voms cms --valid 192:00 -cert .globus/usercert.pem -key .globus/userkey.pem
-
---------------------------------------------
-Stopping a container
-
-After logging out of the ssh session in the docker container, you can temporarily stop the container daemon by doing
-> docker stop cms-cvmfs
-
---------------------------------------------
-Restarting a container
-
-You can restart a container after it had been stopped by doing
-> docker start cms-cvmfs
-
-NOTE: after stopping and restarting a container, the port to use when doing ssh may have changed, make sure to rerun
-> docker port cms-cvmfs 22
-
---------------------------------------------
-Removing a container
-
-If you decide you no longer need that particular container (perhaps you want to start another fresh one), you can delete that container instance by doing
-> docker rm cms-cvmfs
-
-
---------------------------------------------
-Acknowledgements
+## Acknowledgements
 
 This work was based largely on the following work of others
+
 https://twiki.cern.ch/twiki/bin/view/Main/DockerCVMFS
+
 https://github.com/cms-sw/cms-docker/blob/master/cmssw/Dockerfile
+
 http://cmsrep.cern.ch/cmssw/cms/slc6_amd64_gcc530-driver.txt
+
+https://github.com/Dr15Jones/cms-cvmfs-docker
+
+Special thanks goes to Burt Holzman for figuring out how to map the UID/GID and allowing for X11 access without breaking the Fermilab computing policy.
