@@ -11,11 +11,13 @@ Change the password used to login via ssh to the container
 - open the Dockerfile file and find the line containing 'chpasswd'
 - change the default password to something unique
 
-In the directory containing the Dockerfile file, run this commands
-> docker build -t cms-cvmfs-docker .
+In the directory containing the Dockerfile file, run this command
+> docker build -t <name>[:<tag>] .
+For example:
+> docker build -t cms-cvmfs-docker:X11-forwarding-sl6 .
 
 If you would rather not build the container yourself, you can always check it out from Docker Hub.
-> docker pull aperloff/cms-cvmfs-docker:[tag]
+> docker pull aperloff/cms-cvmfs-docker[:tag]
 
 The number of tags varies from time to time based on the current number of branches in GitHub. There will always be a `latest` tag, which is built from the master branch.
 
@@ -23,7 +25,10 @@ The number of tags varies from time to time based on the current number of branc
 Starting the container for the first time
 
 To run the container as a background daemon
-> docker run -d -P --privileged --name cms-cvmfs -v <local directory on your machine containing files you want to access>:/root/<subdirectory in container to get files> cms-cvmfs-docker
+> docker run -d -ti -P --privileged -e DISPLAY=$DISPLAY --name cms-cvmfs -v /Users/aperloff/Downloads/tmp/cmsShow-docker:/root/cmsShow-docker/ aperloff/cms-cvmfs-docker
+> docker run -d -ti -P --privileged -e DISPLAY=host.docker.internal:0 --name cms-cvmfs -v /Users/aperloff/Downloads/tmp/cmsShow-docker:/root/cmsShow-docker/ -v /tmp/.X11-unix:/tmp/.X11-unix aperloff/cms-cvmfs-docker:X11-forwarding
+> docker run --rm -it -P --privileged -e DISPLAY=host.docker.internal:0 -e CVMFS_MOUNTS="cms.cern.ch oasis.opensciencegrid.org" --name cms-cvmfs-test -v /Users/aperloff/Downloads/tmp/cmsShow-docker:/root/cmsShow-docker/ cms-cvmfs-docker:X11-forwarding-sl6
+
 
 To determine which port to use when doing ssh into the container
 > docker port cms-cvmfs 22
@@ -36,8 +41,29 @@ Then to ssh into the container, use the obtained from the previous command, e.g.
 
 Use the password you set in the Dockerfile
 
+If for some reason you recieve the message:
+```bash
+ssh_exchange_identification: Connection closed by remote host
+```
+then run the following command to start the sshd daemon.
+```bash
+docker exec cms-cvmfs service sshd start
+``` 
+In this command ```cms-cvmfs``` is the name of the docker container.
+
+If you need to edit a file inside of the container, say you accidentally changed a setting that locked you out, then use a command like:
+```bash
+docker exec -ti cms-cvmfs sh -c "sed -i 's/PasswordAuthentication no/PasswordAuthentication yes/' /etc/ssh/sshd_config"
+```
+
 Run the following command the very first time you run the container in order to mount the cvmfs file system
 > ./run.sh
+
+If you want to have a command line, but don't need X11 forwarding, you can get access to a shell inside the container by using:
+```bash
+docker exec -it cms-cvmfs bash -i
+```
+The starting path will be '/'. Without the ```-i``` command the shell will start without loading any of the interactive login scripts.
 
 --------------------------------------------
 Setting up an CMSSW area
