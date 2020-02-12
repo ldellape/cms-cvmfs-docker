@@ -91,6 +91,16 @@ If you find you need multiple instances withing the same container you can use t
 
 The starting path will be '/'. Without the ```-i``` command the shell will start without loading any of the interactive login scripts.
 
+### Running a shell script upon startup (will not be interactive)
+
+If all you'd like to do is run a single shell script or command within bash, you may pass this as the docker run "[COMMAND] [ARG...]" options. This will, in fact, be gobbled up by the 'su' command in the run.sh script which started the bash shell owned by the cmsuser user. In order to run a command, use the syntax:
+> docker run <options> aperloff/cms-cvmfs-docker:latest -c <command>
+where all of the docker run options have been omitted for clarity. You may run multiple commands if they are separated by "&&" and surrounded by quotes. For example:
+> -c "<command> && <command>"
+The '-c' option is passed to su and tells it to run the command once the shell has started up. If instead you would like to run a shell script with arguments, simply use:
+> docker run <options> aperloff/cms-cvmfs-docker:latest <script> <arguments>
+Please note, you cannot run multiple shell scripts as all of the scripts will be passed as arguments to the first script.
+
 --------------------------------------------
 ## What can I do with this?
 

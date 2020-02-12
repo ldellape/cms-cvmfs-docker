@@ -39,4 +39,4 @@ else
 fi
 
 #trap : TERM INT; sleep infinity & wait
-su cmsuser -s /bin/bash
+su cmsuser -s /bin/bash "$@"
