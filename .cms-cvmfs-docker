@@ -71,15 +71,21 @@ cvmfs_docker() {
 
 
     if [[ "$local" != "" ]]; then
-    local local_mount="-v ${local}:${remote}"
+	local local_mount="-v ${local}:${remote}"
     else
-    echo "NOTE: No local mount set."
+	echo "NOTE: No local mount set."
     fi
 
+    cmd="docker run --rm -it -P --device /dev/fuse --cap-add SYS_ADMIN -e CVMFS_MOUNTS=\"${mounts}\" -e DISPLAY=host.docker.internal:0 -e MY_UID=$(id -u) -e MY_GID=$(id -g) -v ~/.globus:/home/cmsuser/.globus"
+    if [[ -n $local_mount ]]; then
+	cmd="${cmd} ${local_mount}"
+    fi
+    cmd="${cmd} aperloff/cms-cvmfs-docker:latest"
+    
     if [[ "$debug" == "true" ]]; then
         set -x
     fi
-    docker run --rm -it -P --device /dev/fuse --cap-add SYS_ADMIN -e CVMFS_MOUNTS="${mounts}" -e DISPLAY=host.docker.internal:0 -e MY_UID=$(id -u) -e MY_GID=$(id -g) -v ~/.globus:/home/cmsuser/.globus ${local_mount} aperloff/cms-cvmfs-docker:latest
+    eval ${cmd}
     set +x
 
     return 0
