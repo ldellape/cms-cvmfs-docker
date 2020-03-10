@@ -9,6 +9,8 @@ if cvmfs_config probe ${CVMFS_MOUNTS} >/dev/null; then
     echo -e "DONE"
     if [ -z "$CVMFS_MOUNTS" ]; then
 	echo -e "\tAll CVMFS folders mounted"
+    elif [ "${CVMFS_MOUNTS,,}" == "none" ] || [ "${CVMFS_MOUNTS}" == " " ] ; then
+        echo -ne "Not mounting any filesystems."
     else
 	echo -e "\tThe following CVMFS folders have been successfully mounted:"
 	for MOUNT in ${CVMFS_MOUNTS[@]}; do
@@ -17,7 +19,7 @@ if cvmfs_config probe ${CVMFS_MOUNTS} >/dev/null; then
     fi
 else
     echo -e "DONE\n\tAt least one CVMFS folders is not mounted. Will automatially execute run.sh"
-    /run.sh
+    /mount.sh
 fi
 
 # Source some CMS/VOMS specific setup scripts
