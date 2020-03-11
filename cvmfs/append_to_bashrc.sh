@@ -4,23 +4,25 @@ alias lla='ll -ah'
 alias voms-proxy-init='voms-proxy-init -voms cms --valid 192:00 -cert ~/.globus/usercert.pem -key ~/.globus/userkey.pem'
 
 # Check to see if the cvmfs folders are mounted
-echo -ne "Checking CVMFS mounts ... "
-if cvmfs_config probe ${CVMFS_MOUNTS} >/dev/null; then
-    echo -e "DONE"
-    if [ -z "$CVMFS_MOUNTS" ]; then
-	echo -e "\tAll CVMFS folders mounted"
-    elif [ "${CVMFS_MOUNTS,,}" == "none" ] || [ "${CVMFS_MOUNTS}" == " " ] ; then
-        echo -ne "Not mounting any filesystems."
-    else
-	echo -e "\tThe following CVMFS folders have been successfully mounted:"
-	for MOUNT in ${CVMFS_MOUNTS[@]}; do
-	    echo -e "\t\t${MOUNT}"
-	done
-    fi
+if [ "${CVMFS_MOUNTS,,}" == "none" ] || [ "${CVMFS_MOUNTS}" == " " ] ; then
+    echo -e "Not necessary to check the CVMFS mounts points."
 else
-    echo -e "DONE\n\tAt least one CVMFS folders is not mounted. Will automatially retry the CVMFS mounts."
-    source mount_cvmfs.sh
-    mount_cvmfs
+    echo -ne "Checking CVMFS mounts ... "
+    if cvmfs_config probe ${CVMFS_MOUNTS} >/dev/null; then
+        echo -e "DONE"
+        if [ -z "$CVMFS_MOUNTS" ]; then
+    	echo -e "\tAll CVMFS folders mounted"
+        else
+    	echo -e "\tThe following CVMFS folders have been successfully mounted:"
+    	for MOUNT in ${CVMFS_MOUNTS[@]}; do
+    	    echo -e "\t\t${MOUNT}"
+    	done
+        fi
+    else
+        echo -e "DONE\n\tAt least one CVMFS folders is not mounted. Will automatially retry the CVMFS mounts."
+        source /mount_cvmfs.sh
+        mount_cvmfs
+    fi
 fi
 
 # Source some CMS/VOMS specific setup scripts
