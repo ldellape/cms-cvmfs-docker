@@ -1,6 +1,6 @@
 #!/bin/bash
 
-mount() {
+mount_cvmfs() {
     if [ -z "$CVMFS_MOUNTS" ]; then
 	echo -ne "Mounting all filesystems in /etc/fstab ... "
 	mount -a -F > /dev/null 2>&1

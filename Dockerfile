@@ -33,5 +33,5 @@ ADD cvmfs/append_to_bashrc.sh .append_to_bashrc.sh
 RUN cat .append_to_bashrc.sh >> .bashrc
 
 ADD cvmfs/run.sh /run.sh
-ADD cvmfs/mount.sh /mount.sh
+ADD cvmfs/mount_cvmfs.sh /mount_cvmfs.sh
 ENTRYPOINT ["/run.sh"]

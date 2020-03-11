@@ -18,8 +18,9 @@ if cvmfs_config probe ${CVMFS_MOUNTS} >/dev/null; then
 	done
     fi
 else
-    echo -e "DONE\n\tAt least one CVMFS folders is not mounted. Will automatially execute run.sh"
-    /mount.sh
+    echo -e "DONE\n\tAt least one CVMFS folders is not mounted. Will automatially retry the CVMFS mounts."
+    source mount_cvmfs.sh
+    mount_cvmfs
 fi
 
 # Source some CMS/VOMS specific setup scripts
