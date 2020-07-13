@@ -26,6 +26,7 @@ usermod -u $MY_UID -g $MY_GID --non-unique cmsuser > /dev/null 2>&1
 # Change ownership to cmsuser account on all working folders.
 chown -R $MY_UID:$MY_GID /home/cmsuser
 
+# Mount the CVMFS directories
 source /mount_cvmfs.sh
 mount_cvmfs
 

@@ -4,7 +4,7 @@ This project was setup to allow local access to the CernVM File System (CernVM-F
 
 1. Local access to CVMFS
 2. A Linux environment in which to work with the CMSSW and OSG tools
-3. X11 support for using GUIs and ImageMagic
+3. X11 and VNC support for using GUIs and ImageMagic
 4. Don't trip the Fermilab network security policies
    - Don't ssh into the container using a password
    - Don't open unnecessary ports
@@ -60,9 +60,10 @@ You may also customize the run command with some additional options. These optio
 - To access a grid certificate on the host computer you will need to not only mount the directory containing the certificate files, but also map the host user's UID and GID to that of the remote user. To do this you will need to append the commands: ```-e MY_UID=$(id -u) -e MY_GID=$(id -g) -v ~/.globus:/home/cmsuser/.globus```. Though technically the local ```.globus``` folder doesn't need to be in the local users home area.
 - To mount other local folders, simply add ```-v <path to local folder>:<path to remote folder>```.
 - To name the container, add the ```--name <name>``` option. If you don't name the container, Docker will assign a random string name to the container. You can find the name of the container by entering the command ```docker ps -a``` on the host computer.
+- To run a VNC server inside the container you will need to open a port using the option ```-p 5901:5901```. This will connect the port 5901 of the container to the port 5901 of the localhost.
 
 A full command may look something like:
-> docker run --rm -it -P --device /dev/fuse --cap-add SYS_ADMIN -e CVMFS_MOUNTS="cms.cern.ch oasis.opensciencegrid.org" -e DISPLAY=host.docker.internal:0 -e MY_UID=$(id -u) -e MY_GID=$(id -g) -v ~/.globus:/home/cmsuser/.globus aperloff/cms-cvmfs-docker:latest
+> docker run --rm -it -P -p 5901:5901 --device /dev/fuse --cap-add SYS_ADMIN -e CVMFS_MOUNTS="cms.cern.ch oasis.opensciencegrid.org" -e DISPLAY=host.docker.internal:0 -e MY_UID=$(id -u) -e MY_GID=$(id -g) -v ~/.globus:/home/cmsuser/.globus aperloff/cms-cvmfs-docker:latest
 
 ### Stopping a container
 
@@ -100,6 +101,16 @@ where all of the docker run options have been omitted for clarity. You may run m
 The '-c' option is passed to su and tells it to run the command once the shell has started up. If instead you would like to run a shell script with arguments, simply use:
 > docker run <options> aperloff/cms-cvmfs-docker:latest <script> <arguments>
 Please note, you cannot run multiple shell scripts as all of the scripts will be passed as arguments to the first script.
+
+### Starting and connecting to a VNC server
+
+First of all, remember to map port 5901 when starting the container (see the options above). Once in the container, run the command ```vncserver -geometry $GEOMETRY``` to start the VNC server. The default geometry for the VNC server is 1020x768, but the preset GEOMETRY environment vairable sets this to 1920x1080. You are free to modify the GEOMETRY environment variable to change the window size. The first time you start a server you will be asked to setup a password. It must be at least six characters in length. You should make note of the hexadecimal number and port number you will be provided by the server. It will look something like ```b9a404e6032b:1```. Now you want to run the command ```export DISPLAY=b9a404e6032b:1```, which will set the display of the remote machine to that of the VNC server. At this point, you can connect to the VNC server with your favorte VNC viewer (RealVNC, TightVNC, OSX built-in VNC viewer, etc.). The addess to connect to is 127.0.0.1:5901, or for OSX you can run ```open vnc://127.0.0.1:5901```.
+
+To list the available VNC servers running on the remote machine use ```vncserver -list```
+
+You can kill a currently running VNC server using ```vncserver -kill :1```, where ```:1``` is the "X DISPLAY #".
+
+Note: On OSX you will need to go to System Preferences > Sharing and turn on "Screen Sharing".
 
 --------------------------------------------
 ## What can I do with this?
