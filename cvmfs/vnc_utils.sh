@@ -3,9 +3,10 @@
 start_vnc() {
     nvnc=$((`vncserver -list | wc -l`-4))
     vncname="myvnc:$(($nvnc+1))"
+    desktop="`hostname`:$(($nvnc+1))"
     vncserver -geometry $GEOMETRY -name $vncname
     export ORIGINAL_DISPLAY=$DISPLAY
-    export DISPLAY=$vncname
+    export DISPLAY=$desktop
     if [[ "${1}" == "verbose" ]]; then
 	/usr/local/novnc/utils/launch.sh --vnc 127.0.0.1:5901 &
     else
