@@ -6,6 +6,7 @@ ADD cvmfs/default.local /etc/cvmfs/default.local
 ADD cvmfs/krb5.conf /etc/krb5.conf
 ADD cvmfs/run.sh /run.sh
 ADD cvmfs/mount_cvmfs.sh /mount_cvmfs.sh
+ADD cvmfs/vnc_utils.sh /usr/local/vnc_utils.sh
 
 # Needed for centos, not Scientific Linux
 # RUN rpm -Uvh https://www.itzgeek.com/msttcore-fonts-2.0-3.noarch.rpm
@@ -33,9 +34,19 @@ RUN yum install -y deltarpm \
 #    && sed -i 's/1024/8192/' /etc/security/limits.d/90-nproc.conf
     && sed -i 's/4096/8192/' /etc/security/limits.d/20-nproc.conf
 
+# Install noVNC and WebSockify
+RUN wget --no-check-certificate --content-disposition -O /usr/local/novnc-noVNC-v1.1.0-0-g9fe2fd0.tar.gz https://github.com/novnc/noVNC/tarball/v1.1.0 \
+    # --no-check-cerftificate was necessary for me to have wget not puke about https
+    # Curl version: curl -LJO https://github.com/novnc/noVNC/tarball/v1.1.0
+    && tar -C /usr/local -xvf /usr/local/novnc-noVNC-v1.1.0-0-g9fe2fd0.tar.gz \
+    && rm /usr/local/novnc-noVNC-v1.1.0-0-g9fe2fd0.tar.gz \
+    && ln -s /usr/local/novnc-noVNC-0e9bdff /usr/local/novnc \
+    && git clone https://github.com/novnc/websockify /usr/local/novnc/utils/websockify
+
 WORKDIR /home/cmsuser
 ADD cvmfs/append_to_bashrc.sh .append_to_bashrc.sh
 RUN cat .append_to_bashrc.sh >> .bashrc \
+    && rm .append_to_bashrc.sh \
     && mkdir -p /home/cmsuser/.vnc
 ADD cvmfs/xstartup /home/cmsuser/.vnc/xstartup
 

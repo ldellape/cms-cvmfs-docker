@@ -60,10 +60,10 @@ You may also customize the run command with some additional options. These optio
 - To access a grid certificate on the host computer you will need to not only mount the directory containing the certificate files, but also map the host user's UID and GID to that of the remote user. To do this you will need to append the commands: ```-e MY_UID=$(id -u) -e MY_GID=$(id -g) -v ~/.globus:/home/cmsuser/.globus```. Though technically the local ```.globus``` folder doesn't need to be in the local users home area.
 - To mount other local folders, simply add ```-v <path to local folder>:<path to remote folder>```.
 - To name the container, add the ```--name <name>``` option. If you don't name the container, Docker will assign a random string name to the container. You can find the name of the container by entering the command ```docker ps -a``` on the host computer.
-- To run a VNC server inside the container you will need to open a port using the option ```-p 5901:5901```. This will connect the port 5901 of the container to the port 5901 of the localhost.
+- To run a VNC server inside the container you will need to open two ports using the options ```-p 5901:5901 -p 6080:6080```.
 
 A full command may look something like:
-> docker run --rm -it -P -p 5901:5901 --device /dev/fuse --cap-add SYS_ADMIN -e CVMFS_MOUNTS="cms.cern.ch oasis.opensciencegrid.org" -e DISPLAY=host.docker.internal:0 -e MY_UID=$(id -u) -e MY_GID=$(id -g) -v ~/.globus:/home/cmsuser/.globus aperloff/cms-cvmfs-docker:latest
+> docker run --rm -it -P -p 5901:5901 -p 6080:6080 --device /dev/fuse --cap-add SYS_ADMIN -e CVMFS_MOUNTS="cms.cern.ch oasis.opensciencegrid.org" -e DISPLAY=host.docker.internal:0 -e MY_UID=$(id -u) -e MY_GID=$(id -g) -v ~/.globus:/home/cmsuser/.globus aperloff/cms-cvmfs-docker:latest
 
 ### Stopping a container
 
@@ -104,13 +104,27 @@ Please note, you cannot run multiple shell scripts as all of the scripts will be
 
 ### Starting and connecting to a VNC server
 
-First of all, remember to map port 5901 when starting the container (see the options above). Once in the container, run the command ```vncserver -geometry $GEOMETRY``` to start the VNC server. The default geometry for the VNC server is 1020x768, but the preset GEOMETRY environment vairable sets this to 1920x1080. You are free to modify the GEOMETRY environment variable to change the window size. The first time you start a server you will be asked to setup a password. It must be at least six characters in length. You should make note of the hexadecimal number and port number you will be provided by the server. It will look something like ```b9a404e6032b:1```. Now you want to run the command ```export DISPLAY=b9a404e6032b:1```, which will set the display of the remote machine to that of the VNC server. At this point, you can connect to the VNC server with your favorte VNC viewer (RealVNC, TightVNC, OSX built-in VNC viewer, etc.). The addess to connect to is 127.0.0.1:5901, or for OSX you can run ```open vnc://127.0.0.1:5901```.
+First of all, remember to map ports 5901 and 6080 when starting the container (see the options above). Once in the container, run the command ```start_vnc```. You can use the option ```verbose``` to increase the verbosity of the printouts. The first time you start a server, or after a cleanup, you will be asked to setup a password. It must be at least six characters in length.
 
-To list the available VNC servers running on the remote machine use ```vncserver -list```
+Configuration Options:
+    - You can use the GEOMETRY environment variable to set the size of the VNC window. By default it is set to 1920x1080.
+    - If you run multiple VNC servers you can switch desktops by changing the DISPLAY environment variable like so: ```export DISPLAY=myvnc:1```, which will set the display of the remote machine to that of the VNC server.
 
-You can kill a currently running VNC server using ```vncserver -kill :1```, where ```:1``` is the "X DISPLAY #".
+At this point, you can connect to the VNC server with your favorte VNC viewer (RealVNC, TightVNC, OSX built-in VNC viewer, etc.). The following are the connection addresses:
+  1. VNC viewer address: 127.0.0.1:5901
+  2. OSX built-in VNC viewer command: ```open vnc://127.0.0.1:5901```
+  3. Web browser URL: http://127.0.0.1:6080/vnc.html?host=127.0.0.1&port=6080
 
-Note: On OSX you will need to go to System Preferences > Sharing and turn on "Screen Sharing".
+Note: On OSX you will need to go to System Preferences > Sharing and turn on "Screen Sharing" if using a VNC viewer, built-in or otherwise. You will not need to do this if using the browser.
+
+There are two additional helper functions:
+  1. `stop_vnc`: Kills all of the running vnc servers and the noVNC+WebSockify instance
+  2. `clean_vnc`: In additional to running `stop_vnc`, this will clear all of the temporary files associated with the previous vnc servers
+
+If you'd like more manual control you can use the following commands:
+  1. `vncserver -list`: Will list the available VNC servers running on the remote machine.
+  2. `vncserver -kill :1`: Will kill a currently running VNC server using. `:1` is the "X DISPLAY #".
+  3. `pkill -9 -P <process>`: Will kill the noVNC+WebSockify process if you use the PID given when running `start_vnc` or when starting manually.
 
 --------------------------------------------
 ## What can I do with this?

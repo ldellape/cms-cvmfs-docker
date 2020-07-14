@@ -5,6 +5,7 @@ cvmfs_docker() {
     local mounts=""
     local local=""
     local remote="/root/local_mount/"
+    local vnc=""
     local usage="$FUNCNAME [-h] [-m \"space separated mounts\"] [-l <loacal path to mount>] [-r <remote path to mount>]
     -- opens a temporary docker container for mounting CVMFS
        simply specify the mount points or "" for all and then specify an additional folder to mount into the container
@@ -18,7 +19,7 @@ cvmfs_docker() {
     example: cvmfs_docker -m \"cms.cern.ch oasis.opensciencegrid.org\" -l `pwd` -r /root/workdir"
 
     local OPTIND OPTARG
-    while getopts 'hdm:l:r:' option; do
+    while getopts 'hdm:l:r:v' option; do
         case "$option" in
             d) debug="true"
                ;;
@@ -30,6 +31,8 @@ cvmfs_docker() {
             m) mounts=$OPTARG
                ;;
             r) remote=$OPTARG
+               ;;
+            v) vnc="-p 5901:5901 -p 6080:6080"
                ;;
             :) printf "missing argument for -%s\n" "$OPTARG" >&2
                echo "$usage" >&2
@@ -76,7 +79,7 @@ cvmfs_docker() {
 	echo "NOTE: No local mount set."
     fi
 
-    cmd="docker run --rm -it -P --device /dev/fuse --cap-add SYS_ADMIN -e CVMFS_MOUNTS=\"${mounts}\" -e DISPLAY=host.docker.internal:0 -e MY_UID=$(id -u) -e MY_GID=$(id -g) -v ~/.globus:/home/cmsuser/.globus"
+    cmd="docker run --rm -it -P ${vnc} --device /dev/fuse --cap-add SYS_ADMIN -e CVMFS_MOUNTS=\"${mounts}\" -e DISPLAY=host.docker.internal:0 -e MY_UID=$(id -u) -e MY_GID=$(id -g) -v ~/.globus:/home/cmsuser/.globus"
     if [[ -n $local_mount ]]; then
 	cmd="${cmd} ${local_mount}"
     fi

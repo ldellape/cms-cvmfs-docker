@@ -39,3 +39,6 @@ fi
 
 # Needed to access FNAL EOS
 export XrdSecGSISRVNAMES="cmseos.fnal.gov"
+
+# Get access to the VNC helper function
+source /usr/local/vnc_utils.sh
