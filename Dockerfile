@@ -23,8 +23,8 @@ RUN yum install -y deltarpm \
        xorg-x11-apps openmotif openmotif-devel xz-devel fluxbox tigervnc-server xterm \
     && yum clean all \
     && rm -rf /tmp/.X* \
-    && for repo in cms.cern.ch cms-ib.cern.ch oasis.opensciencegrid.org \
-       	   cms-lpc.opensciencegrid.org sft.cern.ch cms-bril.cern.ch cms-opendata-conddb.cern.ch; \
+    && for repo in cms.cern.ch cms-ib.cern.ch oasis.opensciencegrid.org cms-lpc.opensciencegrid.org \
+       	   sft.cern.ch cms-bril.cern.ch cms-opendata-conddb.cern.ch ilc.desy.de; \
 	   do mkdir /cvmfs/$repo; echo "$repo /cvmfs/$repo cvmfs defaults 0 0" >> /etc/fstab; \
 	done \
     && groupadd cmsuser \
