@@ -2,35 +2,51 @@
 
 cvmfs_docker() {
     local debug="false"
+    local gitconfig="false"
     local mounts=""
+    local name=""
+    local persistence="--rm"
     local local=""
     local remote="/root/local_mount/"
+    local ssh="false"
     local vnc=""
-    local usage="$FUNCNAME [-h] [-m \"space separated mounts\"] [-l <loacal path to mount>] [-r <remote path to mount>]
+    local usage="$FUNCNAME [-h] [-m \"space separated mounts\"] [-l <local path to mount>] [-r <remote path to mount>]
     -- opens a temporary docker container for mounting CVMFS
        simply specify the mount points or "" for all and then specify an additional folder to mount into the container
 
     where:
-        -h  show this help text
-        -m  sets the mount points (default: ${mounts})
-        -l  local path to mount in container (default: ${local})
-        -r  remote path to mount in the container (default: ${remote})
+        -d            print the command being used to invoke the docker container (default: ${debug})
+        -g            mount the global gitconfig file from the host (default: ${gitconfig})
+        -h            show this help text
+        -l  [LOCAL]   local path to mount in container (default: ${local})
+        -m  [MOUNTS]  sets the mount points; space separate multiple points inside quotes (default: ${mounts})
+        -n  [NAME]    make the container persistent (default: ${name})
+        -r  [REMOTE]  remote path to mount in the container (default: ${remote})
+        -s            mount the .ssh folder (default: ${ssh})
+        -v            expose the ports needed to use a VNC viewer (default: ${vnc})
 
     example: cvmfs_docker -m \"cms.cern.ch oasis.opensciencegrid.org\" -l `pwd` -r /root/workdir"
 
     local OPTIND OPTARG
-    while getopts 'hdm:l:r:v' option; do
+    while getopts 'hdgm:n:l:r:sv' option; do
         case "$option" in
             d) debug="true"
+               ;;
+            g) gitconfig="true"
                ;;
             h) echo "$usage"
                return 0
                ;;
             l) local=$OPTARG
                ;;
+            n) name=$OPTARG
+               persistence=""
+               ;;
             m) mounts=$OPTARG
                ;;
             r) remote=$OPTARG
+               ;;
+            s) ssh="true"
                ;;
             v) vnc="-p 5901:5901 -p 6080:6080"
                ;;
@@ -74,14 +90,26 @@ cvmfs_docker() {
 
 
     if [[ "$local" != "" ]]; then
-	local local_mount="-v ${local}:${remote}"
+    local local_mount="-v ${local}:${remote}"
     else
-	echo "NOTE: No local mount set."
+    echo "NOTE: No local mount set."
     fi
 
-    cmd="docker run --rm -it -P ${vnc} --device /dev/fuse --cap-add SYS_ADMIN -e CVMFS_MOUNTS=\"${mounts}\" -e DISPLAY=host.docker.internal:0 -e MY_UID=$(id -u) -e MY_GID=$(id -g) -v ~/.globus:/home/cmsuser/.globus"
+    cmd="docker run ${persistence} -it -P ${vnc} --device /dev/fuse --cap-add SYS_ADMIN -e CVMFS_MOUNTS=\"${mounts}\" -e DISPLAY=host.docker.internal:0 -e MY_UID=$(id -u) -e MY_GID=$(id -g) -v ~/.globus:/home/cmsuser/.globus"
+    if [[ "$ssh" == "true" ]]; then
+        # ssh agent forwarding from:
+        #  https://medium.com/@nazrulworld/ssh-agent-forward-into-docker-container-on-macos-ff847ec660e2
+        #  https://docs.docker.com/docker-for-mac/osxfs/#ssh-agent-forwarding
+        cmd="${cmd} -v ~/.ssh:/home/cmsuser/.ssh --mount type=bind,src=${SSH_AUTH_SOCK},target=${SSH_AUTH_SOCK} -e SSH_AUTH_SOCK=\"${SSH_AUTH_SOCK}\""
+    fi
+    if [[ "${gitconfig}" == "true" ]]; then
+        cmd="${cmd} --mount type=bind,source=`readlink ${HOME}/.gitconfig`,target=/home/cmsuser/.gitconfig"
+    fi
     if [[ -n $local_mount ]]; then
-	cmd="${cmd} ${local_mount}"
+        cmd="${cmd} ${local_mount}"
+    fi
+    if [[ -n $name ]]; then
+        cmd="${cmd} --name ${name}"
     fi
     cmd="${cmd} aperloff/cms-cvmfs-docker:latest"
     
