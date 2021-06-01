@@ -8,9 +8,9 @@ start_vnc() {
     export ORIGINAL_DISPLAY=$DISPLAY
     export DISPLAY=$desktop
     if [[ "${1}" == "verbose" ]]; then
-	/usr/local/novnc/utils/launch.sh --vnc 127.0.0.1:5901 &
+	/usr/local/novnc/utils/launch.sh --vnc 127.0.0.1:$((5900+$nvnc+1)) &
     else
-	/usr/local/novnc/utils/launch.sh --vnc 127.0.0.1:5901 > /dev/null 2>&1 &
+	/usr/local/novnc/utils/launch.sh --vnc 127.0.0.1:$((5900+$nvnc+1)) > /dev/null 2>&1 &
     fi
     export NOVNCPID=$!
     echo -e "VNC connection points:"
