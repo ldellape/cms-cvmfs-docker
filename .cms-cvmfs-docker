@@ -2,12 +2,17 @@
 
 cvmfs_docker() {
     local debug="false"
+    local display="host.docker.internal:0"
+    local dryrun="false"
     local gitconfig="false"
+    local image="aperloff/cms-cvmfs-docker:latest"
     local mounts=""
     local name=""
     local persistence="--rm"
+    local port=""
     local local=""
     local remote="/root/local_mount/"
+    local registry="docker.io/"
     local ssh="false"
     local vnc=""
     local usage="$FUNCNAME [-h] [-m \"space separated mounts\"] [-l <local path to mount>] [-r <remote path to mount>]
@@ -15,28 +20,37 @@ cvmfs_docker() {
        simply specify the mount points or "" for all and then specify an additional folder to mount into the container
 
     where:
-        -d            print the command being used to invoke the docker container (default: ${debug})
+        -d            print the command being used to invoke the docker container, but don't run the container (default: ${dryrun})
+        -D            set the display (default: ${display})
         -g            mount the global gitconfig file from the host (default: ${gitconfig})
         -h            show this help text
-        -l  [LOCAL]   local path to mount in container (default: ${local})
-        -m  [MOUNTS]  sets the mount points; space separate multiple points inside quotes (default: ${mounts})
-        -n  [NAME]    make the container persistent (default: ${name})
-        -r  [REMOTE]  remote path to mount in the container (default: ${remote})
+        -i [image]    specify the Docker image to be used (default: ${image})
+        -l [LOCAL]    local path to mount in container (default: ${local})
+        -m [MOUNTS]   sets the mount points; space separate multiple points inside quotes (default: ${mounts})
+        -n [NAME]     make the container persistent (default: ${name})
+        -p [PORT]     open a port using the specified port number (default: ${port})
+        -r [REMOTE]   remote path to mount in the container (default: ${remote})
+        -R [registry] the Docker registry of the image (default: ${registry})
         -s            mount the .ssh folder (default: ${ssh})
         -v            expose the ports needed to use a VNC viewer (default: ${vnc})
+        -V            print extra debugging information (default: ${debug})
 
     example: cvmfs_docker -m \"cms.cern.ch oasis.opensciencegrid.org\" -l `pwd` -r /root/workdir"
 
     local OPTIND OPTARG
-    while getopts 'hdgm:n:l:r:sv' option; do
+    while getopts 'dDghi:m:n:l:p:r:R:svV' option; do
         case "$option" in
-            d) debug="true"
+            d) dryrun="true"
                ;;
+	    D) display=$OPTARG
+	       ;;
             g) gitconfig="true"
                ;;
             h) echo "$usage"
                return 0
                ;;
+	    i) image=$OPTARG
+	       ;;
             l) local=$OPTARG
                ;;
             n) name=$OPTARG
@@ -44,12 +58,19 @@ cvmfs_docker() {
                ;;
             m) mounts=$OPTARG
                ;;
+	    p) port=$OPTARG
+	       port="-p ${port}:${port}"
+	       ;;
             r) remote=$OPTARG
                ;;
+	    R) registry=$OPTARG
+	       ;;
             s) ssh="true"
                ;;
             v) vnc="-p 5901:5901 -p 6080:6080"
                ;;
+	    V) debug="true"
+	       ;;
             :) printf "missing argument for -%s\n" "$OPTARG" >&2
                echo "$usage" >&2
                return -1
@@ -62,40 +83,55 @@ cvmfs_docker() {
     done
     shift $((OPTIND - 1))
 
-    # Capture the output of the xhost command and look for the lines:
-    #  "access control enabled, only authorized clients can connect"
-    #  "INET:localhost
-    # If the first is different, then the xhost access should be reset by doing:
-    #  xhost -
-    # Then check again. If either the second line is missing, or the first was there, but the second one was missing, then do:
-    #  xhost +127.0.0.1
-    # Then check again. If it's not right this time, then exit and throw an error
-    xhost_enabled="access control enabled, only authorized clients can connect"
-    xhost_localhost="INET:localhost"
-    xhost_check="$(xhost)"
-    if [[ $xhost_check == *"${xhost_localhost}"* ]]; then
-        echo "Note::access control already enabled, including an opening for localhost"
-    else
-        xhost -
-        xhost_check="$(xhost)"
-        if [[ $xhost_check != *"${xhost_enabled}"* ]]; then
-            xhost +127.0.0.1
+    # Only do the xhost checking if the system has xhost
+    if [[ $(command -v xhost) ]] && [[ ! "${dryrun}" == "true" ]]; then
+	# Capture the output of the xhost command and look for the lines:
+	#  "access control enabled, only authorized clients can connect"
+	#  "INET:localhost
+	# If the first is different, then the xhost access should be reset by doing:
+	#  xhost -
+	# Then check again. If either the second line is missing, or the first was there, but the second one was missing, then do:
+	#  xhost +127.0.0.1
+	# Then check again. If it's not right this time, then exit and throw an error
+	xhost_enabled="access control enabled, only authorized clients can connect"
+	xhost_localhost="INET:localhost"
+	xhost_check="$(xhost)"
+	if [[ $xhost_check == *"${xhost_localhost}"* ]]; then
+            echo "Note::access control already enabled, including an opening for localhost"
+	else
+            xhost -
             xhost_check="$(xhost)"
-            if [[ $xhost_check != *"${xhost_localhost}"* ]]; then
-                echo "ERROR:Unable to set the xhost settings properly"
-                return -3
+            if [[ $xhost_check != *"${xhost_enabled}"* ]]; then
+		xhost +127.0.0.1
+		xhost_check="$(xhost)"
+		if [[ $xhost_check != *"${xhost_localhost}"* ]]; then
+                    echo "ERROR:Unable to set the xhost settings properly"
+                    return -3
+		fi
             fi
+	fi
+    fi
+
+    # Format the local mount point
+    if [[ "$local" != "" ]]; then
+        local local_mount="-v ${local}:${remote}"
+    else
+        echo "NOTE: No local mount set."
+    fi
+
+    # Format the image used
+    if [[ -z ${image} ]]; then
+        if [[ "${registry: -1}" == "/" ]]; then
+            registry="${registry: : -1}"
+        fi
+        if [[ "${registry}" == *"docker.io"* ]]; then
+            image=${registry}/${image}
+        elif [[ "${registry}" == *"gitlab-registry.cern.ch"* ]]; then
+            image=${registry}/aperloff/${image}
         fi
     fi
 
-
-    if [[ "$local" != "" ]]; then
-    local local_mount="-v ${local}:${remote}"
-    else
-    echo "NOTE: No local mount set."
-    fi
-
-    cmd="docker run ${persistence} -it -P ${vnc} --device /dev/fuse --cap-add SYS_ADMIN -e CVMFS_MOUNTS=\"${mounts}\" -e DISPLAY=host.docker.internal:0 -e MY_UID=$(id -u) -e MY_GID=$(id -g) -v ~/.globus:/home/cmsuser/.globus"
+    cmd="docker run ${persistence} -it -P ${vnc} ${port} --device /dev/fuse --cap-add SYS_ADMIN -e CVMFS_MOUNTS=\"${mounts}\" -e DISPLAY=${display} -e MY_UID=$(id -u) -e MY_GID=$(id -g) -v ~/.globus:/home/cmsuser/.globus"
     if [[ "$ssh" == "true" ]]; then
         # ssh agent forwarding from:
         #  https://medium.com/@nazrulworld/ssh-agent-forward-into-docker-container-on-macos-ff847ec660e2
@@ -111,12 +147,16 @@ cvmfs_docker() {
     if [[ -n $name ]]; then
         cmd="${cmd} --name ${name}"
     fi
-    cmd="${cmd} aperloff/cms-cvmfs-docker:latest"
+    cmd="${cmd} ${image}"
     
     if [[ "$debug" == "true" ]]; then
         set -x
     fi
-    eval ${cmd}
+    if [[ "${dryrun}" == "true" ]]; then
+	echo "${cmd}"
+    else
+	eval ${cmd}
+    fi
     set +x
 
     return 0
