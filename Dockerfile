@@ -29,8 +29,8 @@ RUN yum install -y deltarpm \
        	   sft.cern.ch cms-bril.cern.ch cms-opendata-conddb.cern.ch ilc.desy.de; \
 	   do mkdir /cvmfs/$repo; echo "$repo /cvmfs/$repo cvmfs defaults 0 0" >> /etc/fstab; \
 	done \
-    && groupadd cmsuser \
-    && useradd -m -s /bin/bash -g cmsuser cmsuser \
+    && groupadd cmsusr \
+    && useradd -m -s /bin/bash -g cmsusr cmsusr \
 # In sl6, the default limit of 1024 causes a problem if host UID == guest UID
 # While this container uses sl7, this line is left for reference
 #    && sed -i 's/1024/8192/' /etc/security/limits.d/90-nproc.conf
@@ -45,12 +45,12 @@ RUN wget --no-check-certificate --content-disposition -O /usr/local/novnc-noVNC-
     && ln -s /usr/local/novnc-noVNC-0e9bdff /usr/local/novnc \
     && git clone https://github.com/novnc/websockify /usr/local/novnc/utils/websockify
 
-WORKDIR /home/cmsuser
+WORKDIR /home/cmsusr
 ADD cvmfs/append_to_bashrc.sh .append_to_bashrc.sh
 RUN cat .append_to_bashrc.sh >> .bashrc \
     && rm .append_to_bashrc.sh \
-    && mkdir -p /home/cmsuser/.vnc
-ADD cvmfs/xstartup /home/cmsuser/.vnc/xstartup
+    && mkdir -p /home/cmsusr/.vnc
+ADD cvmfs/xstartup /home/cmsusr/.vnc/xstartup
 
 ENV GEOMETRY 1920x1080
 

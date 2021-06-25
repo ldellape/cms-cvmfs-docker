@@ -131,15 +131,15 @@ cvmfs_docker() {
         fi
     fi
 
-    cmd="docker run ${persistence} -it -P ${vnc} ${port} --device /dev/fuse --cap-add SYS_ADMIN -e CVMFS_MOUNTS=\"${mounts}\" -e DISPLAY=${display} -e MY_UID=$(id -u) -e MY_GID=$(id -g) -v ~/.globus:/home/cmsuser/.globus"
+    cmd="docker run ${persistence} -it -P ${vnc} ${port} --device /dev/fuse --cap-add SYS_ADMIN -e CVMFS_MOUNTS=\"${mounts}\" -e DISPLAY=${display} -e MY_UID=$(id -u) -e MY_GID=$(id -g) -v ~/.globus:/home/cmsusr/.globus"
     if [[ "$ssh" == "true" ]]; then
         # ssh agent forwarding from:
         #  https://medium.com/@nazrulworld/ssh-agent-forward-into-docker-container-on-macos-ff847ec660e2
         #  https://docs.docker.com/docker-for-mac/osxfs/#ssh-agent-forwarding
-        cmd="${cmd} -v ~/.ssh:/home/cmsuser/.ssh --mount type=bind,src=${SSH_AUTH_SOCK},target=${SSH_AUTH_SOCK} -e SSH_AUTH_SOCK=\"${SSH_AUTH_SOCK}\""
+        cmd="${cmd} -v ~/.ssh:/home/cmsusr/.ssh --mount type=bind,src=${SSH_AUTH_SOCK},target=${SSH_AUTH_SOCK} -e SSH_AUTH_SOCK=\"${SSH_AUTH_SOCK}\""
     fi
     if [[ "${gitconfig}" == "true" ]]; then
-        cmd="${cmd} --mount type=bind,source=`readlink ${HOME}/.gitconfig`,target=/home/cmsuser/.gitconfig"
+        cmd="${cmd} --mount type=bind,source=`readlink ${HOME}/.gitconfig`,target=/home/cmsusr/.gitconfig"
     fi
     if [[ -n $local_mount ]]; then
         cmd="${cmd} ${local_mount}"
