@@ -54,7 +54,7 @@ jobs:
           flavor: |
             latest=auto
           tags: |
-            type=match,pattern=master,value=latest,priority=1000
+            type=match,pattern=master,priority=1000
             type=schedule
             type=ref,event=branch
             type=ref,event=tag
