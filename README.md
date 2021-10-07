@@ -66,6 +66,8 @@ You may also customize the run command with some additional options. These optio
    - sft.cern.ch
    - cms-bril.cern.ch
    - cms-opendata-conddb.cern.ch
+   - ilc.desy.de
+   - unpacked.cern.ch
 - To access a grid certificate on the host computer you will need to not only mount the directory containing the certificate files, but also map the host user's UID and GID to that of the remote user. To do this you will need to append the commands: `-e MY_UID=$(id -u) -e MY_GID=$(id -g) -v ~/.globus:/home/cmsusr/.globus`. Though technically the local `.globus` folder doesn't need to be in the local users home area.
 - To mount other local folders, simply add `-v <path to local folder>:<path to remote folder>`.
 - To name the container, add the `--name <name>` option. If you don't name the container, Docker will assign a random string name to the container. You can find the name of the container by entering the command `docker ps -a` on the host computer.
