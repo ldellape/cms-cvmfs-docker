@@ -52,9 +52,9 @@ jobs:
         uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
         with:
           flavor: |
-            latest=auto
+            latest=${{ github.ref == 'refs/heads/master' }}
           tags: |
-            type=match,pattern=master,priority=1000
+            type=raw,enable=${{ github.ref == 'refs/heads/master' }},value=latest
             type=schedule
             type=ref,event=branch
             type=ref,event=tag
