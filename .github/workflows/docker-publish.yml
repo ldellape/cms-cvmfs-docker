@@ -53,12 +53,6 @@ jobs:
         with:
           flavor: |
             latest=${{ github.ref == 'refs/heads/master' }}
-          tags: |
-            type=raw,enable=${{ github.ref == 'refs/heads/master' }},value=latest
-            type=schedule
-            type=ref,event=branch
-            type=ref,event=tag
-            type=ref,event=pr
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
 
       # Build and push Docker image with Buildx (don't push on PR)
