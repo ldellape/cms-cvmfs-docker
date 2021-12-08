@@ -18,7 +18,7 @@ RUN yum install -y deltarpm \
     && yum repolist \
     && yum install -y https://ecsft.cern.ch/dist/cvmfs/cvmfs-release/cvmfs-release-latest.noarch.rpm \
     && yum install -y cern-get-sso-cookie \
-    && yum install -y emacs nano vim openssh-server cvmfs man freetype openssl098e libXpm libXext wget git \
+    && yum install -y emacs nano vim python3 openssh-server cvmfs man freetype openssl098e libXpm libXext wget git \
        tcsh zsh tcl  perl-ExtUtils-Embed perl-libwww-perl compat-libstdc++-33 libXmu  libXpm  zip e2fsprogs \
        krb5-devel krb5-workstation strace libXft ImageMagick ImageMagick-devel mesa-libGL mesa-libGL-devel \
        mesa-libGLU mesa-libGLU-devel glx-utils libXrender-devel libXtst-devel xorg-x11-server-Xorg xorg-x11-xauth \
