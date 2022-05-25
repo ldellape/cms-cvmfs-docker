@@ -110,7 +110,7 @@ docker rm <container name>
 
 If you find you need multiple instances withing the same container you can use the following command to open a new shell in the container:
 ```bash
-docker exec -it <container name> bash -i
+docker exec -it --user cmsusr <container name> bash -i
 ```
 
 The starting path will be `/`. Without the `-i` command the shell will start without loading any of the interactive login scripts.
