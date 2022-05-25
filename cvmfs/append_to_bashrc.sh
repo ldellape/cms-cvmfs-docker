@@ -19,7 +19,7 @@ else
     	    done
         fi
     else
-        echo -e "DONE\n\tAt least one CVMFS folders is not mounted. Will automatially retry the CVMFS mounts."
+        echo -e "DONE\n\tAt least one CVMFS folders is not mounted. Will automatically retry the CVMFS mounts."
         source /mount_cvmfs.sh
         mount_cvmfs
     fi
