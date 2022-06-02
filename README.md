@@ -78,6 +78,8 @@ A full command may look something like:
 docker run --rm -it -P -p 5901:5901 -p 6080:6080 --device /dev/fuse --cap-add SYS_ADMIN -e CVMFS_MOUNTS="cms.cern.ch oasis.opensciencegrid.org" -e DISPLAY=host.docker.internal:0 -e MY_UID=$(id -u) -e MY_GID=$(id -g) -v ~/.globus:/home/cmsusr/.globus aperloff/cms-cvmfs-docker:latest
 ```
 
+**Note:** On certain Linux distributions (i.e. Ubuntu) you will need to turn off `apparmor` in order for CVMFS to be mounted successfully. Simply add the option `--security-opt apparmor:unconfined` to your `docker run` command.
+
 ### Stopping a container
 
 If you've added the `--rm` option to the run command, then the container will be removed once you enter the `exit` command from within the container and the pseudo-tty is closed.
@@ -154,6 +156,18 @@ If you'd like more manual control you can use the following commands:
   1. `vncserver -list`: Will list the available VNC servers running on the remote machine.
   2. `vncserver -kill :1`: Will kill a currently running VNC server using. `:1` is the "X DISPLAY #".
   3. `pkill -9 -P <process>`: Will kill the noVNC+WebSockify process if you use the PID given when running `start_vnc` or when starting manually.
+
+### Using X11
+
+You will need to have a properly configured X Window System on the host system. For OSX we recommend XQuartz. For Windows popular options are xming and VcXsrv, though others are also available. Windows systems may also use cygwin with winpty and prefix your docker command like winpty docker.
+
+The options to allow X11 windows to be transmitted to the host are different for the different host operating systems:
+ - **OSX:** `-e DISPLAY=host.docker.internal:0`
+ - **Linux:** `-e DISPLAY=$DISPLAY -e XAUTHORITY=~/.Xauthority -v ~/.Xauthority:/home/cmsuser/.Xauthority -v /tmp/.X11-unix/:/tmp/.X11-unix`
+
+#### Special instructions for OSX users
+
+Once XQuarts is installed, start the program and navigate to XQuartz -> Preferences -> Security. Make sure that both the “Authenticate connections” and “Allow connections from network clients” checkboxes are selected. If you change any settings, you will need to restart XQuartz.
 
 --------------------------------------------
 ## What can I do with this?
