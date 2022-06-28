@@ -11,12 +11,12 @@ This project was setup to allow local access to the CernVM File System (CernVM-F
    - Don't allow the use of passwords to login
    - Simply put, don't use Ubuntu or Centos unless you want to configure a lot of the software yourself
 5. UID and GID mapping for using the grid certificate on the localhost
-6. Use of a lightweight container system like docker rather than a full virtual machine
-7. The use of DockerHub as a build system
+6. Use of a lightweight container system like Docker rather than a full virtual machine
+7. The use of GitHub Actions as a build system
 
-Branch|Build|Type|Pulls|Stars|Docker Hub
----|---|---|---|---|---
-latest | [![Docker Build Status](https://img.shields.io/docker/build/aperloff/cms-cvmfs-docker.svg)](https://img.shields.io/docker/build/aperloff/cms-cvmfs-docker.svg) | [![Docker Build Type](https://img.shields.io/docker/automated/aperloff/cms-cvmfs-docker.svg)](https://img.shields.io/docker/automated/aperloff/cms-cvmfs-docker.svg) | [![](https://img.shields.io/docker/pulls/aperloff/cms-cvmfs-docker.svg)](https://img.shields.io/docker/pulls/aperloff/cms-cvmfs-docker.svg) | [![](https://img.shields.io/docker/stars/aperloff/cms-cvmfs-docker.svg)](https://img.shields.io/docker/stars/aperloff/cms-cvmfs-docker.svg) | [cms-cvmfs-docker](https://hub.docker.com/r/aperloff/cms-cvmfs-docker/)
+Branch|Build|Image Size|Pulls|Docker Hub
+---|---|---|---|---
+latest | [![Docker Build Status](https://github.com/aperloff/cms-cvmfs-docker/actions/workflows/docker-publish.yml/badge.svg)](https://github.com/aperloff/cms-cvmfs-docker/actions/workflows/docker-publish.yml) | [![Docker Image Size](https://img.shields.io/docker/image-size/aperloff/cms-cvmfs-docker?sort=semver)](https://hub.docker.com/r/aperloff/cms-cvmfs-docker "Click to view the image on Docker Hub") | [![](https://img.shields.io/docker/pulls/aperloff/cms-cvmfs-docker.svg)](https://img.shields.io/docker/pulls/aperloff/cms-cvmfs-docker.svg) | [cms-cvmfs-docker](https://hub.docker.com/r/aperloff/cms-cvmfs-docker/)
 
 --------------------------------------------
 ## Setting up the Docker image
