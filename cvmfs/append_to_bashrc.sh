@@ -26,13 +26,16 @@ else
 fi
 
 # Source some CMS/VOMS specific setup scripts
-if [ -f "/cvmfs/cms.cern.ch/cmsset_default.sh" ]; then
-    source /cvmfs/cms.cern.ch/cmsset_default.sh
+
+cmsset_loc=/cvmfs/cms.cern.ch/cmsset_default.sh
+if [ -f "$cmsset_loc" ]; then
+    source $cmsset_loc
 else
-    echo -e "Unable to source /cvmfs/cms.cern.ch/cmsset_default.sh"
+    echo -e "Unable to source $cmsset_loc"
 fi
-if [ -f "/cvmfs/oasis.opensciencegrid.org/mis/osg-wn-client/current/el7-x86_64/setup.sh" ]; then
-    source /cvmfs/oasis.opensciencegrid.org/mis/osg-wn-client/current/el7-x86_64/setup.sh
+osg_loc=/cvmfs/oasis.opensciencegrid.org/mis/osg-wn-client/current/el7-x86_64/setup.sh
+if [ -f "$osg_loc" ]; then
+    source $osg_loc
 else
     echo -e "Unable to setup the grid utilities from /cvmfs/oasis.opensciencegrid.org/"
 fi
