@@ -33,7 +33,7 @@ if [ -f "$cmsset_loc" ]; then
 else
     echo -e "Unable to source $cmsset_loc"
 fi
-osg_loc=/cvmfs/oasis.opensciencegrid.org/mis/osg-wn-client/3.6/current/el7-x86_64/setup.sh
+osg_loc=/cvmfs/oasis.opensciencegrid.org/mis/osg-wn-client/3.6/current/el9-x86_64/setup.sh
 if [ -f "$osg_loc" ]; then
     source $osg_loc
 else
