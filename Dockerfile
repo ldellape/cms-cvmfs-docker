@@ -56,4 +56,6 @@ ADD cvmfs/xstartup /home/cmsusr/.vnc/xstartup
 
 ENV GEOMETRY 1920x1080
 
+RUN yum install -y patch
+
 ENTRYPOINT ["/run.sh"]
