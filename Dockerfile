@@ -57,4 +57,4 @@ ENV GEOMETRY 1920x1080
 
 RUN yum install -y patch
 
-CMD ["sh", "-c", "cron && /run.sh"]
+ENTRYPOINT ["/run.sh"]
