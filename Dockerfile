@@ -13,10 +13,7 @@ RUN yum install -y cronie
 RUN yum install -y krb5-workstation
 
 ADD cvmfs/renew_kerberos.sh /renew_kerberos.sh
-RUN chmod +x /renew_kerberos.sh
-
-RUN echo "0 */1 * * * root /renew_kerberos.sh" > /etc/cron.d/kerberos-renew
-
+RUN chmod +xrw /renew_kerberos.sh
 RUN systemctl enable crond
 
 RUN yum update -y 

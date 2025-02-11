@@ -1,4 +1,5 @@
 #!/bin/bash
+echo "* * * * *  /utils/cms-cvmfs-docker/cvmfs/renew_kerberos.sh" | crontab -
 
 chmod o+rw /dev/fuse
 
